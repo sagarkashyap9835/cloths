@@ -1,206 +1,369 @@
 
+// import validator from 'validator';
+// import bcrypt from 'bcryptjs';
+// import userModel from '../models/userModel.js';
+// import jwt from 'jsonwebtoken';
+// import {v2 as cloudinary} from 'cloudinary'
+
+// // REGISTER USER
+// export const registerUser = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+
+//     if (!name || !email || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All fields are required"
+//       });
+//     }
+
+//     if (!validator.isEmail(email)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid email format"
+//       });
+//     }
+
+//     if (password.length < 8) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Password must be at least 8 characters long"
+//       });
+//     }
+
+//     const existingUser = await userModel.findOne({ email });
+//     if (existingUser) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "User already registered with this email"
+//       });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const newUser = new userModel({
+//       name,
+//       email,
+//       password: hashedPassword
+//     });
+
+//     const user = await newUser.save();
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: '30d'
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       token,
+//       message: "User registered successfully"
+//     });
+
+//   } catch (error) {
+//     console.error("Registration error:", error.message);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
+
+// // LOGIN USER
+// export const loginUser = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email and password are required"
+//       });
+//     }
+
+//     const user = await userModel.findOne({ email });
+//     if (!user) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "User does not exist"
+//       });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Incorrect password"
+//       });
+//     }
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: '30d'
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       token,
+//       message: "Login successful"
+//     });
+
+//   } catch (error) {
+//     console.error("Login error:", error.message);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
+
+
+// export const getProfile = async (req, res) => {
+//   try {
+//     const userId = req.userId; // ✅ middleware se aayega
+
+//     if (!userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User ID is required",
+//       });
+//     }
+
+//     const userData = await userModel.findById(userId).select("-password");
+//     if (!userData) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found",
+//       });
+//     }
+
+//     let parsedAddress = userData.address;
+//     if (typeof parsedAddress === "string") {
+//       try {
+//         parsedAddress = JSON.parse(userData.address);
+//       } catch (e) {
+//         parsedAddress = { line1: "", line2: "" };
+//       }
+//     }
+
+//     res.json({
+//       success: true,
+//       userData: {
+//         ...userData._doc,
+//         address: parsedAddress,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Get Profile error:", error.message);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+// export const updateProfile = async (req, res) => {
+//   try {
+//     const userId = req.userId; // token se mila hua userId
+
+//     const { name, phone, address, dob, gender } = req.body;
+//     const imageFile = req.file;
+
+//     if (!name || !phone || !dob || !gender) {
+//       return res.json({ success: false, message: "Data missing" });
+//     }
+
+//     const user = await userModel.findById(userId);
+//     if (!user) {
+//       return res.json({ success: false, message: "User not found" });
+//     }
+
+//     // Update fields
+//     user.name = name;
+//     user.phone = phone;
+//     user.address = JSON.parse(address);
+//     user.dob = dob;
+//     user.gender = gender;
+
+//     // If image file exists, upload it and set URL
+//     if (imageFile) {
+//       const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+//         resource_type: "image",
+//       });
+//       user.image = imageUpload.secure_url;
+//     }
+
+//     await user.save(); // ✅ save to persist all updates
+
+//     res.json({ success: true, message: "Profile updated" });
+
+//   } catch (error) {
+//     console.error("Update Profile Error:", error.message);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import userModel from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
-import {v2 as cloudinary} from 'cloudinary'
+import { v2 as cloudinary } from 'cloudinary';
+import { OAuth2Client } from 'google-auth-library';
 
-// REGISTER USER
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// GOOGLE AUTHENTICATION (Login/Register)
+export const googleLogin = async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        // 1. Google Token ko verify karein
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const { name, email, picture } = ticket.getPayload();
+
+        // 2. Check karein ki user database mein hai ya nahi
+        let user = await userModel.findOne({ email });
+
+        if (!user) {
+            // Agar naya user hai, to create karein
+            // Password random generate kar rahe hain kyunki ye Google se login hai
+            const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-8), 10);
+            
+            user = new userModel({
+                name,
+                email,
+                image: picture, // Google profile photo
+                password: randomPassword
+            });
+            await user.save();
+        }
+
+        // 3. JWT Token generate karein
+        const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: '30d'
+        });
+
+        res.status(200).json({
+            success: true,
+            token: jwtToken,
+            message: "Google Login Successful"
+        });
+
+    } catch (error) {
+        console.error("Google Auth Error:", error.message);
+        res.status(500).json({ success: false, message: "Google Authentication failed" });
+    }
+};
+
+// REGISTER USER (Manual)
 export const registerUser = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+    try {
+        const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required"
-      });
+        if (!name || !email || !password) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
+        }
+
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ success: false, message: "Invalid email format" });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ success: false, message: "Password must be at least 8 characters long" });
+        }
+
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ success: false, message: "User already registered" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await new userModel({ name, email, password: hashedPassword }).save();
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+        res.status(201).json({ success: true, token, message: "User registered successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email format"
-      });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 8 characters long"
-      });
-    }
-
-    const existingUser = await userModel.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User already registered with this email"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new userModel({
-      name,
-      email,
-      password: hashedPassword
-    });
-
-    const user = await newUser.save();
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
-
-    res.status(201).json({
-      success: true,
-      token,
-      message: "User registered successfully"
-    });
-
-  } catch (error) {
-    console.error("Registration error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
-// LOGIN USER
+// LOGIN USER (Manual)
 export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required"
-      });
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ success: false, message: "User does not exist" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Incorrect password" });
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        res.status(200).json({ success: true, token, message: "Login successful" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    const user = await userModel.findOne({ email });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User does not exist"
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Incorrect password"
-      });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
-
-    res.status(200).json({
-      success: true,
-      token,
-      message: "Login successful"
-    });
-
-  } catch (error) {
-    console.error("Login error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
-
+// GET USER PROFILE
 export const getProfile = async (req, res) => {
-  try {
-    const userId = req.userId; // ✅ middleware se aayega
+    try {
+        const userId = req.userId; 
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is required",
-      });
+        const userData = await userModel.findById(userId).select("-password");
+        if (!userData) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        let parsedAddress = userData.address;
+        if (typeof parsedAddress === "string") {
+            try { parsedAddress = JSON.parse(userData.address); } 
+            catch (e) { parsedAddress = { line1: "", line2: "" }; }
+        }
+
+        res.json({ success: true, userData: { ...userData._doc, address: parsedAddress } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    const userData = await userModel.findById(userId).select("-password");
-    if (!userData) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    let parsedAddress = userData.address;
-    if (typeof parsedAddress === "string") {
-      try {
-        parsedAddress = JSON.parse(userData.address);
-      } catch (e) {
-        parsedAddress = { line1: "", line2: "" };
-      }
-    }
-
-    res.json({
-      success: true,
-      userData: {
-        ...userData._doc,
-        address: parsedAddress,
-      },
-    });
-  } catch (error) {
-    console.error("Get Profile error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
 };
 
-
+// UPDATE USER PROFILE
 export const updateProfile = async (req, res) => {
-  try {
-    const userId = req.userId; // token se mila hua userId
+    try {
+        const userId = req.userId;
+        const { name, phone, address, dob, gender } = req.body;
+        const imageFile = req.file;
 
-    const { name, phone, address, dob, gender } = req.body;
-    const imageFile = req.file;
+        if (!name || !phone || !dob || !gender) {
+            return res.json({ success: false, message: "Data missing" });
+        }
 
-    if (!name || !phone || !dob || !gender) {
-      return res.json({ success: false, message: "Data missing" });
+        const user = await userModel.findById(userId);
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        user.name = name;
+        user.phone = phone;
+        user.address = JSON.parse(address);
+        user.dob = dob;
+        user.gender = gender;
+
+        if (imageFile) {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+            user.image = imageUpload.secure_url;
+        }
+
+        await user.save();
+        res.json({ success: true, message: "Profile updated" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.json({ success: false, message: "User not found" });
-    }
-
-    // Update fields
-    user.name = name;
-    user.phone = phone;
-    user.address = JSON.parse(address);
-    user.dob = dob;
-    user.gender = gender;
-
-    // If image file exists, upload it and set URL
-    if (imageFile) {
-      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-        resource_type: "image",
-      });
-      user.image = imageUpload.secure_url;
-    }
-
-    await user.save(); // ✅ save to persist all updates
-
-    res.json({ success: true, message: "Profile updated" });
-
-  } catch (error) {
-    console.error("Update Profile Error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
-  }
 };
-
-
 
