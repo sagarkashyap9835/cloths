@@ -24,6 +24,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AddItem from "./pages/AddItem";
 import ItemList from "./pages/ItemList";
 import OrderList from "./pages/OrderList";
+import Messages from "./pages/Messages";
+
 function App() {
   return (
     <AdminProvider>
@@ -37,7 +39,7 @@ function App() {
             <Route path="/add-item" element={<AddItem />} />
             <Route path="/items" element={<ItemList />} />
             <Route path="/order" element={<OrderList />} />
-            
+            <Route path="/messages" element={<Messages />} />
           </Route>
         </Routes>
       </Router>

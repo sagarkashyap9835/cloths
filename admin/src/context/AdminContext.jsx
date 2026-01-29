@@ -1,12 +1,35 @@
 import { createContext, useState } from "react";
 import axios from "axios";
-
+import { useEffect } from "react";
 export const AdminContext = createContext();
 
 export const AdminProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
-  // const backendUrl = "https://raja-electronic.onrender.com";
+  const [adminData, setAdminData] = useState(false);
   const backendUrl = "http://localhost:5000";
+
+  const loadAdminProfileData = async () => {
+    try {
+      if (!token) return;
+      const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setAdminData(data.userData);
+      }
+    } catch (error) {
+      console.log("Get Admin Profile Error:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      loadAdminProfileData();
+    } else {
+      setAdminData(false);
+    }
+  }, [token]);
 
   const registerOwner = async (name, email, password) => {
     try {
@@ -81,7 +104,7 @@ export const AdminProvider = ({ children }) => {
   };
 
   return (
-    <AdminContext.Provider value={{ token, loginAdmin, registerOwner, loginWithGoogle, logoutAdmin, backendUrl }}>
+    <AdminContext.Provider value={{ token, setToken, adminData, setAdminData, loginAdmin, registerOwner, loginWithGoogle, logoutAdmin, backendUrl }}>
       {children}
     </AdminContext.Provider>
   );

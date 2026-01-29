@@ -10,6 +10,7 @@ import productRoute from "./routes/productRoute.js";
 import bodyParser from "body-parser";
 import orderRoutes from "./routes/orderRoutes.js";
 import contactRoutes from "./routes/contactRoute.js";
+import messageRouter from "./routes/messageRoute.js";
 
 dotenv.config();
 const app = express();
@@ -55,6 +56,7 @@ app.use("/api/user", userRouter)
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/message", messageRouter);
 app.get("/", (req, res) => {
   res.send("api works vidy kashyap")
 })

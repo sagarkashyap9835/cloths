@@ -121,6 +121,18 @@ export const getProfile = async (req, res) => {
     try {
         const userId = req.userId;
 
+        if (userId === 'super-admin') {
+            return res.json({
+                success: true,
+                userData: {
+                    _id: 'super-admin',
+                    name: 'Super Admin',
+                    email: process.env.ADMIN_EMAIL,
+                    role: 'admin'
+                }
+            });
+        }
+
         const userData = await userModel.findById(userId).select("-password");
         if (!userData) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -134,6 +146,7 @@ export const getProfile = async (req, res) => {
 
         res.json({ success: true, userData: { ...userData._doc, address: parsedAddress } });
     } catch (error) {
+        console.error("getProfile Error:", error);
         res.status(500).json({ success: false, message: error.message });
     }
 };

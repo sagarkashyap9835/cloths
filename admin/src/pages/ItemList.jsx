@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 const RoomList = () => {
   const { token, backendUrl } = useContext(AdminContext);
   const [rooms, setRooms] = useState([]);
+  const [otpInputs, setOtpInputs] = useState({}); // Tracking OTP input for each room
 
   const fetchRooms = async () => {
     try {
@@ -22,6 +23,23 @@ const RoomList = () => {
       console.error("Failed to fetch owner rooms", err);
     }
   };
+
+  const handleVerifyOtp = async (id) => {
+    const otp = otpInputs[id];
+    if (!otp) return toast.error("Please enter OTP");
+
+    try {
+      const res = await axios.post(`${backendUrl}/api/room/verify-otp/${id}`, { otp }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        toast.success("Aadhaar Verified Successfully ✅");
+        fetchRooms();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid OTP");
+    }
+  }
 
   const handleDelete = async (id) => {
     if (!token) return alert("Please login as admin");
@@ -99,8 +117,39 @@ const RoomList = () => {
                 <div className="mt-3 bg-gray-50 p-2 rounded text-xs border border-gray-200">
                   <p className="font-semibold text-gray-700">Owner: {room.ownerName}</p>
                   <p className="text-gray-500">Aadhaar: {room.aadhaarNumber}</p>
+                  <p className="text-gray-500">Phone: {room.ownerPhone}</p>
                   {room.aadhaarImage && (
                     <a href={room.aadhaarImage} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline mt-1 block">View Aadhaar Card</a>
+                  )}
+
+                  {/* OTP Verification Section for Owner */}
+                  {!room.isOtpVerified && (
+                    <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                      <p className="text-[10px] font-bold text-amber-700 uppercase mb-2">Aadhaar OTP Verification</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="6-Digit OTP"
+                          className="flex-1 px-2 py-1 rounded border text-xs outline-none focus:border-amber-500"
+                          maxLength={6}
+                          value={otpInputs[room._id] || ""}
+                          onChange={(e) => setOtpInputs({ ...otpInputs, [room._id]: e.target.value })}
+                        />
+                        <button
+                          onClick={() => handleVerifyOtp(room._id)}
+                          className="bg-amber-500 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-amber-600 transition-all"
+                        >
+                          VERIFY
+                        </button>
+                      </div>
+                      <p className="text-[9px] text-amber-600 mt-1 italic">*Admin needs to trigger OTP from their dashboard first.</p>
+                    </div>
+                  )}
+                  {room.isOtpVerified && room.verified && (
+                    <div className="mt-4 p-2 bg-green-50 text-green-700 text-[10px] font-bold text-center rounded border border-green-200 uppercase">
+                      Verified & LIVE on Website ✅ <br />
+                      <span className="text-[8px] font-normal lowercase">Owner identity confirmed via Aadhaar</span>
+                    </div>
                   )}
                 </div>
 

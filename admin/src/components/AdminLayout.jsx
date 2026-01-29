@@ -48,6 +48,9 @@ const AdminLayout = () => {
           <Link to="/order" className="block hover:underline">
             📦 Order List
           </Link>
+          <Link to="/messages" className="block hover:underline">
+            💬 Messages
+          </Link>
         </nav>
       </aside>
 

@@ -56,6 +56,11 @@ const roomSchema = new mongoose.Schema(
     aadhaarImage: { type: String, required: true },
     verified: { type: Boolean, default: false },
     ownerId: { type: String, required: true },
+
+    // Aadhaar OTP Verification
+    ownerPhone: { type: String, required: true },
+    verificationOtp: { type: String },
+    isOtpVerified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

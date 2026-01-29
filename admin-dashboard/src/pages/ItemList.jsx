@@ -9,12 +9,29 @@ const RoomList = () => {
 
   const fetchRooms = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/room/all`);
+      const res = await axios.get(`${backendUrl}/api/room/admin-all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (res.data.success) setRooms(res.data.rooms);
     } catch (err) {
       console.error("Failed to fetch rooms", err);
     }
   };
+
+  const handleSendOtp = async (id) => {
+    if (!token) return alert("Please login as admin");
+    try {
+      const res = await axios.post(`${backendUrl}/api/room/send-otp/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        fetchRooms();
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP");
+    }
+  }
 
   const handleVerify = async (id) => {
     if (!token) return alert("Please login as admin");
@@ -27,7 +44,7 @@ const RoomList = () => {
         fetchRooms();
       }
     } catch (error) {
-      toast.error("Verification failed ❌");
+      toast.error(error.response?.data?.message || "Verification failed ❌");
     }
   };
 
@@ -72,14 +89,31 @@ const RoomList = () => {
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2 mb-6 text-sm">
                   <p className="font-bold text-slate-700 uppercase tracking-tight">Owner: <span className="font-normal">{room.ownerName}</span></p>
                   <p className="font-bold text-slate-700 uppercase tracking-tight">Aadhaar: <span className="font-normal">{room.aadhaarNumber}</span></p>
+                  <p className="font-bold text-slate-700 uppercase tracking-tight">Phone: <span className="font-normal">{room.ownerPhone}</span></p>
                   {room.aadhaarImage && (
                     <a href={room.aadhaarImage} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-blue-600 font-bold underline hover:text-blue-800">Review ID Doc →</a>
+                  )}
+                  {room.isOtpVerified ? (
+                    <div className="mt-2 text-[10px] font-black text-green-600 uppercase">Identity Verified ✅</div>
+                  ) : (
+                    <button
+                      onClick={() => handleSendOtp(room._id)}
+                      className="mt-3 w-full bg-amber-500 text-white py-2 rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-amber-600 transition-all"
+                    >
+                      🚀 Send Aadhaar OTP
+                    </button>
                   )}
                 </div>
 
                 <div className="flex gap-3">
                   {!room.verified && (
-                    <button onClick={() => handleVerify(room._id)} className="flex-1 bg-green-500 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-green-600 transition-all shadow-md active:scale-95">Approve ✅</button>
+                    <button
+                      onClick={() => handleVerify(room._id)}
+                      disabled={!room.isOtpVerified}
+                      className={`flex-1 ${room.isOtpVerified ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 cursor-not-allowed'} text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all shadow-md active:scale-95`}
+                    >
+                      Approve ✅
+                    </button>
                   )}
                   <button onClick={() => handleDelete(room._id)} className="flex-1 bg-red-500 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-all shadow-md active:scale-95">Delete 🗑️</button>
                 </div>
