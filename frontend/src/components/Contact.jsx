@@ -30,7 +30,7 @@ const Contact = () => {
         toast.error(res.data.message);
       }
     } catch (err) {
-      toast.error("Server error ❌");
+      toast.error("Server error ");
     }
   };
 
@@ -68,7 +68,7 @@ const Contact = () => {
 
           <div className="space-y-6">
             <div className="flex gap-4 items-start">
-              <span className="text-xl">📍</span>
+              <span className="text-xl"></span>
               <p className="font-semibold">
                 Barahi Bazar, Sitamarhi, Bihar
               </p>
@@ -80,7 +80,7 @@ const Contact = () => {
             </div>
 
             <div className="flex gap-4 items-start">
-              <span className="text-xl">📧</span>
+              <span className="text-xl"></span>
               <p className="font-semibold">hostel.support@gmail.com</p>
             </div>
           </div>
