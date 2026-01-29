@@ -6,8 +6,6 @@ import { toast } from "react-toastify";
 const OrderList = () => {
   const { token, backendUrl } = useContext(AdminContext);
   const [orders, setOrders] = useState([]);
-
-  // 🔹 Fetch all orders (Admin)
   const fetchOrders = async () => {
     try {
       if (!token) return;

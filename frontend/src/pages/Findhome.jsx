@@ -47,12 +47,11 @@ const Findhome = () => {
       );
     }
 
-    // Price Range Filter
+  
     if (priceRange) {
       filtered = filtered.filter((r) => r.rent >= priceRange.min && r.rent <= priceRange.max);
     }
 
-    // Sort Order
     if (sortOrder === "lowToHigh") filtered.sort((a, b) => a.rent - b.rent);
     else if (sortOrder === "highToLow") filtered.sort((a, b) => b.rent - a.rent);
 
@@ -68,7 +67,7 @@ const Findhome = () => {
 
   return (
     <div className="p-3 sm:p-10 bg-gray-50 min-h-screen pt-24 md:pt-32">
-      {/* Header Section */}
+      
       <div className="max-w-7xl mx-auto mb-6 md:mb-12 px-2">
         <h1 className="text-3xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic">
           Find Your <span className="text-blue-600">Dream Room</span>
@@ -76,7 +75,7 @@ const Findhome = () => {
         <p className="text-[10px] md:text-xs text-gray-400 mt-1 font-bold tracking-[0.2em]">COMFORT & LUXURY // 2026</p>
       </div>
 
-      {/* 💰 Filters */}
+    
       <div className="flex flex-wrap items-center gap-3 mb-8 px-2">
         <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
           {ranges.map((range, idx) => (
@@ -93,7 +92,7 @@ const Findhome = () => {
           ))}
         </div>
 
-        {/* Sort Select */}
+      
         <select
           onChange={(e) => setSortOrder(e.target.value)}
           className="ml-auto px-4 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 outline-none focus:border-blue-500"
@@ -103,8 +102,6 @@ const Findhome = () => {
           <option value="highToLow">Rent: High to Low</option>
         </select>
       </div>
-
-      {/* 🛍 Rooms Grid */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>

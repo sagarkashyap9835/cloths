@@ -6,8 +6,6 @@ const About = () => {
 
   return (
     <div className="bg-white min-h-screen pt-20">
-
-      {/* HERO SECTION */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop"
