@@ -223,6 +223,11 @@ const AddRoom = ({ refreshRooms }) => {
   const [bathroomType, setBathroomType] = useState("Attached");
   const [availableRooms, setAvailableRooms] = useState(1);
 
+  // Owner Verification Details
+  const [ownerName, setOwnerName] = useState("");
+  const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [aadhaarImage, setAadhaarImage] = useState(null);
+
   const [amenities, setAmenities] = useState({
     wifi: false,
     furnished: false,
@@ -238,6 +243,13 @@ const AddRoom = ({ refreshRooms }) => {
     e.preventDefault();
     if (!token) return alert("Admin login required");
 
+    if (aadhaarNumber.length !== 12) {
+      return alert("Aadhaar Number must be exactly 12 digits.");
+    }
+    if (!aadhaarImage) {
+      return alert("Please upload Aadhaar Image for verification.");
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -246,6 +258,11 @@ const AddRoom = ({ refreshRooms }) => {
     formData.append("beds", beds);
     formData.append("bathroomType", bathroomType);
     formData.append("availableRooms", availableRooms);
+
+    // Append Owner Details
+    formData.append("ownerName", ownerName);
+    formData.append("aadhaarNumber", aadhaarNumber);
+    formData.append("aadhaarImage", aadhaarImage);
 
     Object.keys(amenities).forEach((key) => {
       formData.append(key, amenities[key]);
@@ -268,12 +285,15 @@ const AddRoom = ({ refreshRooms }) => {
       );
 
       if (res.data.success) {
-        alert("Room added successfully ✅");
+        alert(res.data.message || "Property submitted for Verification ✅");
         setTitle("");
         setDescription("");
         setRent("");
         setBeds(1);
         setImages([]);
+        setOwnerName("");
+        setAadhaarNumber("");
+        setAadhaarImage(null);
         if (refreshRooms) refreshRooms();
       }
     } catch (error) {
@@ -287,7 +307,40 @@ const AddRoom = ({ refreshRooms }) => {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg space-y-5"
       >
-        <h2 className="text-2xl font-bold text-center">Add New Room</h2>
+        <h2 className="text-2xl font-bold text-center">Add Property (Owner)</h2>
+        <p className="text-xs text-center text-gray-500">Submit your property for Admin Verification</p>
+
+        {/* --- Owner Details (Verification) --- */}
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h3 className="font-semibold text-sm mb-2 text-blue-800">Owner Verification</h3>
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Owner Full Name"
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              className="input text-sm"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Aadhaar Number (12 Digits)"
+              value={aadhaarNumber}
+              maxLength={12}
+              onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, ''))}
+              className="input text-sm"
+              required
+            />
+            <div className="text-xs text-gray-500">Upload Aadhaar Card Image:</div>
+            <input
+              type="file"
+              onChange={(e) => setAadhaarImage(e.target.files[0])}
+              className="w-full text-sm"
+              accept="image/*"
+              required
+            />
+          </div>
+        </div>
 
         {/* Title */}
         <input
@@ -382,18 +435,21 @@ const AddRoom = ({ refreshRooms }) => {
         </select>
 
         {/* Images */}
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setImages(e.target.files)}
-          className="w-full"
-        />
+        <div className="space-y-1">
+          <span className="text-xs text-gray-500">Property Images (Max 5)</span>
+          <input
+            type="file"
+            multiple
+            onChange={(e) => setImages(e.target.files)}
+            className="w-full"
+          />
+        </div>
 
         <button
           type="submit"
           className="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700"
         >
-          Add Room
+          Submit for Verification
         </button>
       </form>
 

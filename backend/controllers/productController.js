@@ -74,6 +74,7 @@ import Room from "../models/roomModel.js";
 import { v2 as cloudinary } from "cloudinary";
 
 // ➕ Add Room (Admin)
+// ➕ Add Room (Admin/Owner)
 export const addRoom = async (req, res) => {
   try {
     const {
@@ -90,21 +91,38 @@ export const addRoom = async (req, res) => {
       ac,
       lightType,
       availableRooms,
+      ownerName,    // 🆕
+      aadhaarNumber // 🆕
     } = req.body;
 
-    if (!title || !rent || !bhkType || !bathroomType) {
+    if (!title || !rent || !bhkType || !ownerName || !aadhaarNumber) {
       return res.status(400).json({ success: false, message: "Required fields missing" });
     }
 
-    let uploadedImages = [];
+    if (aadhaarNumber.length !== 12) {
+      return res.status(400).json({ success: false, message: "Aadhaar number must be 12 digits" });
+    }
 
-    if (req.files?.length > 0) {
-      for (let file of req.files) {
+    // Handle Room Images
+    let uploadedImages = [];
+    if (req.files['images']) {
+      for (let file of req.files['images']) {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: "room-rent",
+          folder: "room-rent/rooms",
         });
         uploadedImages.push(result.secure_url);
       }
+    }
+
+    // Handle Aadhaar Image
+    let aadhaarImageUrl = "";
+    if (req.files['aadhaarImage'] && req.files['aadhaarImage'][0]) {
+      const result = await cloudinary.uploader.upload(req.files['aadhaarImage'][0].path, {
+        folder: "room-rent/aadhaar",
+      });
+      aadhaarImageUrl = result.secure_url;
+    } else {
+      return res.status(400).json({ success: false, message: "Aadhaar image is required" });
     }
 
     const room = await Room.create({
@@ -115,18 +133,34 @@ export const addRoom = async (req, res) => {
       beds,
       bathroomType,
       amenities: {
-        wifi,
-        furnished,
-        fan,
-        cooler,
-        ac,
+        wifi: wifi === 'true',
+        furnished: furnished === 'true',
+        fan: fan === 'true',
+        cooler: cooler === 'true',
+        ac: ac === 'true',
         lightType,
       },
       images: uploadedImages,
       availableRooms,
+      ownerName,           // 🆕
+      aadhaarNumber,       // 🆕
+      aadhaarImage: aadhaarImageUrl, // 🆕
+      verified: false,     // 🆕 Default false
     });
 
-    res.json({ success: true, message: "Room added successfully", room });
+    res.json({ success: true, message: "Property submitted for verification", room });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Verify Room (Admin)
+export const verifyRoom = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const room = await Room.findByIdAndUpdate(id, { verified: true }, { new: true });
+    res.json({ success: true, message: "Property Verified Successfully", room });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -143,16 +177,18 @@ export const getRooms = async (req, res) => {
 };
 
 // ✏️ Update Room
+// ✏️ Update Room
 export const updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
     let updateData = { ...req.body };
 
-    if (req.files?.length > 0) {
+    // Handle Upload Fields (Object)
+    if (req.files && req.files['images']) {
       let images = [];
-      for (let file of req.files) {
+      for (let file of req.files['images']) {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: "room-rent",
+          folder: "room-rent/rooms",
         });
         images.push(result.secure_url);
       }

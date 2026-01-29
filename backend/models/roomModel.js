@@ -49,6 +49,12 @@ const roomSchema = new mongoose.Schema(
     images: [{ type: String }], // Multiple images allowed
 
     availableRooms: { type: Number, default: 1 }, // spots left
+
+    // Verification Details
+    ownerName: { type: String, required: true },
+    aadhaarNumber: { type: String, required: true }, // 12 digit validation in controller
+    aadhaarImage: { type: String, required: true },
+    verified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

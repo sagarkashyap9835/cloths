@@ -22,7 +22,8 @@ const Header = () => {
       try {
         const res = await axios.get(`${backendUrl}/api/room/all`);
         if (res.data.success) {
-          setRooms(res.data.rooms || []);
+          const verifiedRooms = (res.data.rooms || []).filter(r => r.verified === true);
+          setRooms(verifiedRooms);
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
@@ -107,6 +108,11 @@ const RoomCard = ({ room, addToCart, index, navigate }) => (
       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white px-3 py-1 text-[10px] font-bold uppercase rounded-lg">
         {room.bhkType}
       </div>
+      {room.verified && (
+        <div className="absolute bottom-2 left-2 bg-green-500/90 text-white px-2 py-0.5 text-[10px] font-bold uppercase rounded-md flex items-center gap-1">
+          ✅ Verified
+        </div>
+      )}
     </div>
 
     {/* Content Area */}
