@@ -13,10 +13,6 @@ const Header = () => {
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Use simple ranges for featured section usually, or just show latest. 
-  // User asked to look like Findhome. Let's show "Featured Rooms" grid.
-
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -89,13 +85,12 @@ const Header = () => {
   );
 };
 
-// --- Responsive Room Card Component (Shared Style) ---
 const RoomCard = ({ room, addToCart, index, navigate }) => (
   <div
     className="group relative animate-card flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100"
     style={{ animationDelay: `${index * 0.05}s` }}
   >
-    {/* Image Container */}
+  
     <div
       className="relative aspect-[4/3] overflow-hidden bg-gray-100 cursor-pointer"
       onClick={() => navigate(`/room/${room._id}`)}
@@ -115,7 +110,6 @@ const RoomCard = ({ room, addToCart, index, navigate }) => (
       )}
     </div>
 
-    {/* Content Area */}
     <div className="p-4 flex flex-col flex-grow">
       <div className="flex justify-between items-start mb-2">
         <h2
