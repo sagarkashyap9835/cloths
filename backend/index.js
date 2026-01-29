@@ -12,7 +12,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import contactRoutes from "./routes/contactRoute.js";
 
 dotenv.config();
-const app=express();
+const app = express();
 // app.use(cors());
 
 const allowedOrigins = [
@@ -47,19 +47,20 @@ app.use(bodyParser.json());
 // api end points nmsdjbbjhb 
 
 app.use(express.json());
-app.use("/api/product", productRoute);
+app.use("/api/product", productRoute); // Keep for compatibility if needed, or remove
+app.use("/api/room", productRoute);
 app.use("/api/admin", adminRoute);
-app.use("/api/user",userRouter)
+app.use("/api/user", userRouter)
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRoutes);
 app.use("/api/contact", contactRoutes);
-app.get("/",(req,res)=>{
-    res.send("api works vidy kashyap")
+app.get("/", (req, res) => {
+  res.send("api works vidy kashyap")
 })
 
 connectDb();
 connectCloudinary();
 
-app.listen(process.env.PORT,()=>{
-    console.log(`server app running on ${process.env.PORT}`)
+app.listen(process.env.PORT, () => {
+  console.log(`server app running on ${process.env.PORT}`)
 })

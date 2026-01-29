@@ -32,6 +32,7 @@
 
 import express from "express";
 import {
+  placeOrder,
   createOrder,
   verifyPayment,
   getAllOrders,
@@ -45,6 +46,7 @@ import { authAdmin } from "../middlewares/authAdmin.js";
 const router = express.Router();
 
 // User routes
+router.post("/place", authUser, placeOrder);
 router.post("/create", authUser, createOrder);
 router.post("/verify", authUser, verifyPayment);
 router.get("/my-orders", authUser, getUserOrders);

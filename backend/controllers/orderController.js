@@ -10,6 +10,32 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// 🟢 Place Order (COD)
+export const placeOrder = async (req, res) => {
+  try {
+    const { items, amount, address } = req.body; // items, amount, address from frontend
+
+    const newOrder = new Order({
+      userId: req.userId,
+      items,
+      amount,
+      address, // Ensure model supports address if needed, or store in user. Ideally order should have address snapshot.
+      status: "Pending",
+      paymentMethod: "COD",
+      deliveryStatus: "Pending"
+    });
+    await newOrder.save();
+
+    // Clear user cart
+    // await User.findByIdAndUpdate(req.userId, { cartData: [] }); // Optional: clear cart here
+
+    res.json({ success: true, message: "Order placed successfully" });
+  } catch (error) {
+    console.error("Place Order Error:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // 🟢 Create Razorpay Order
 export const createOrder = async (req, res) => {
   try {

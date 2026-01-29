@@ -6,26 +6,33 @@ import Contact from './pages/Contact'
 import MyProfile from './pages/MyProfile'
 import Login from './pages/Login'
 import MyOrder from './pages/MyOrder'
-import Product from './pages/Product'
+import Product from './pages/Findhome'
+import Findhome from './pages/Findhome'
+import RoomDetails from './pages/RoomDetails'
+import Cart from './pages/Cart'
+import PlaceOrder from './pages/PlaceOrder'
 import Footer from './pages/Footer'
-import { Routes,Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 
 const App = () => {
   return (
     <>
-<Navbar/>
-     <Routes>
+      <Navbar />
+      <Routes>
         <Route path="/" element={<Home />} />
-         <Route path="/product" element={<Product />} /> 
+        <Route path="/findhome" element={<Findhome />} />
+        <Route path="/room/:id" element={<RoomDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/my-order" element={<MyOrder />} />
         <Route path="/my-profile" element={<MyProfile />} />
-    </Routes>
-        <Footer/>
+      </Routes>
+      <Footer />
     </>
-    
+
   )
 }
 

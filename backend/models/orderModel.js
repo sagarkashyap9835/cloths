@@ -41,6 +41,8 @@
 // export default mongoose.model("Order", orderSchema);
 // models/orderModel.js
 
+
+
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
@@ -59,6 +61,8 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
       },
     ],
+    address: { type: Object },
+    paymentMethod: { type: String, default: "COD" },
     amount: {
       type: Number,
       required: true,
@@ -69,7 +73,6 @@ const orderSchema = new mongoose.Schema(
     },
     razorpayOrderId: {
       type: String,
-      required: true,
     },
     razorpayPaymentId: String,
     status: {

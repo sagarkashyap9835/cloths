@@ -1,121 +1,78 @@
-
-
 import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import { AppContext } from "../pages/Appcontext";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
-const Product = () => {
+const Header = () => {
   const { addToCart } = useContext(CartContext);
-  const { backendUrl, searchTerm } = useContext(AppContext);
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const { backendUrl } = useContext(AppContext);
+  const navigate = useNavigate();
+
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState(null);
-  const [sortOrder, setSortOrder] = useState(null);
+
+  // Use simple ranges for featured section usually, or just show latest. 
+  // User asked to look like Findhome. Let's show "Featured Rooms" grid.
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchRooms = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/product/all`);
-        setProducts(res.data.products || []);
-        setFilteredProducts(res.data.products || []);
+        const res = await axios.get(`${backendUrl}/api/room/all`);
+        if (res.data.success) {
+          setRooms(res.data.rooms || []);
+        }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching rooms:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchRooms();
   }, [backendUrl]);
 
-  useEffect(() => {
-    let filtered = [...products];
-    if (searchTerm) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    if (priceRange) {
-      filtered = filtered.filter((p) => p.price >= priceRange.min && p.price <= priceRange.max);
-    }
-    if (sortOrder === "lowToHigh") filtered.sort((a, b) => a.price - b.price);
-    else if (sortOrder === "highToLow") filtered.sort((a, b) => b.price - a.price);
-
-    setFilteredProducts(filtered);
-  }, [searchTerm, products, priceRange, sortOrder]);
-
-  const ranges = [
-    { label: "All", min: 0, max: Infinity },
-    { label: "Under 200", min: 0, max: 200 },
-    { label: "200 - 500", min: 200, max: 500 },
-    { label: "500 - 1000", min: 500, max: 1000 },
-    { label: "Over 1000", min: 1000, max: 99999 },
-  ];
 
   return (
-    <div className="p-6 sm:p-10 bg-[#fbfbfb] min-h-screen pt-24 md:pt-32">
+    <div className="p-4 sm:p-10 bg-[#fbfbfb] min-h-screen pt-12">
       {/* Header Section */}
       <div className="text-center mb-12 animate-fade-in-down">
         <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-2 uppercase tracking-tighter">
-          Exclusive <span className="text-blue-600">Collection</span>
+          Featured <span className="text-blue-600">Rooms</span>
         </h1>
-        <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
+        <p className="text-gray-500 mt-3 text-sm md:text-base max-w-2xl mx-auto">
+          Explore our latest listings directly on the home page.
+        </p>
+        <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full mt-4"></div>
       </div>
 
-      {/* 💰 Modern Range Filters */}
-      <div className="flex flex-wrap justify-center gap-3 mb-8">
-        {ranges.map((range, idx) => (
-          <button
-            key={idx}
-            onClick={() => setPriceRange(range.label === "All" ? null : { min: range.min, max: range.max })}
-            className={`px-6 py-2 rounded-full text-sm font-bold border-2 transition-all duration-300 transform active:scale-95 ${
-              priceRange?.min === range.min && priceRange?.max === range.max
-                ? "bg-black text-white border-black shadow-lg"
-                : "bg-white text-gray-600 border-gray-100 hover:border-blue-400 hover:text-blue-600 shadow-sm"
-            }`}
-          >
-            {range.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ↕️ Soft Sort Buttons */}
-      <div className="flex justify-center gap-4 mb-12">
-        <button 
-            onClick={() => setSortOrder("lowToHigh")} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${sortOrder === "lowToHigh" ? "text-blue-600" : "text-gray-400 hover:text-gray-900"}`}
-        >
-          Low To High ↑
-        </button>
-        <span className="text-gray-200">|</span>
-        <button 
-            onClick={() => setSortOrder("highToLow")} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${sortOrder === "highToLow" ? "text-blue-600" : "text-gray-400 hover:text-gray-900"}`}
-        >
-          High To Low ↓
-        </button>
-      </div>
-
-      {/* 🛍 Products Grid */}
+      {/* 🛍 Rooms Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
-      ) : filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {filteredProducts.map((product, index) => (
-            <ProductCard key={product._id} product={product} addToCart={addToCart} index={index} />
+      ) : rooms.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {rooms.slice(0, 8).map((room, index) => (
+            <RoomCard key={room._id} room={room} addToCart={addToCart} index={index} navigate={navigate} />
           ))}
         </div>
       ) : (
         <div className="text-center py-20">
-          <p className="text-2xl text-gray-400 font-light">No products matched your search ☹️</p>
+          <p className="text-2xl text-gray-400 font-light">No rooms available right now ☹️</p>
         </div>
       )}
-      
+
+      <div className="text-center mt-16">
+        <button
+          onClick={() => navigate('/findhome')}
+          className="px-8 py-3 bg-black text-white rounded-full font-bold uppercase tracking-widest hover:bg-gray-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          View All Rooms
+        </button>
+      </div>
+
       <ToastContainer position="bottom-right" autoClose={2000} />
 
       <style>{`
@@ -131,43 +88,60 @@ const Product = () => {
   );
 };
 
-const ProductCard = ({ product, addToCart, index }) => (
-  <div 
-    style={{ animationDelay: `${index * 0.1}s` }}
-    className="animate-card opacity-0 group bg-white rounded-[2rem] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-2 border border-gray-50"
+// --- Responsive Room Card Component (Shared Style) ---
+const RoomCard = ({ room, addToCart, index, navigate }) => (
+  <div
+    className="group relative animate-card flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+    style={{ animationDelay: `${index * 0.05}s` }}
   >
     {/* Image Container */}
-    <div className="relative overflow-hidden bg-[#f9f9f9] aspect-square flex items-center justify-center p-8">
-        <img 
-            src={product.image} 
-            alt={product.name} 
-            className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" 
-        />
-        {/* Quick Add Overlay */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <span className="bg-white text-black text-xs font-black px-4 py-2 rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform">VIEW DETAIL</span>
-        </div>
+    <div
+      className="relative aspect-[4/3] overflow-hidden bg-gray-100 cursor-pointer"
+      onClick={() => navigate(`/room/${room._id}`)}
+    >
+      <img
+        src={room.images?.[0] || 'https://via.placeholder.com/400x300?text=No+Image'}
+        alt={room.title}
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white px-3 py-1 text-[10px] font-bold uppercase rounded-lg">
+        {room.bhkType}
+      </div>
     </div>
 
-    {/* Details */}
-    <div className="p-6 text-center">
-      <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">New Trend</p>
-      <h2 className="text-lg font-bold text-gray-800 line-clamp-1 mb-2 group-hover:text-blue-600 transition-colors">
-        {product.name}
-      </h2>
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <span className="text-xl font-black text-gray-900">₹{product.price}</span>
-        <span className="text-sm text-gray-400 line-through font-light">₹{Math.round(product.price * 1.3)}</span>
+    {/* Content Area */}
+    <div className="p-4 flex flex-col flex-grow">
+      <div className="flex justify-between items-start mb-2">
+        <h2
+          className="text-lg font-bold text-gray-900 leading-tight line-clamp-1 cursor-pointer hover:text-blue-600 transition-colors"
+          onClick={() => navigate(`/room/${room._id}`)}
+        >
+          {room.title}
+        </h2>
       </div>
-      
-      <button 
-        className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-blue-600 shadow-lg hover:shadow-blue-200 transition-all duration-300 active:scale-95"
-        onClick={() => addToCart(product)}
-      >
-        ADD TO BAG
-      </button>
+
+      <p className="text-xs text-gray-500 line-clamp-2 mb-4">{room.description}</p>
+
+      <div className="mt-auto grid grid-cols-2 items-center pt-3 border-t border-gray-100">
+        <span className="text-xl font-black text-gray-900">₹{room.rent}<span className="text-[10px] font-normal text-gray-400">/mo</span></span>
+
+        <button
+          className="ml-auto bg-black text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCart({
+              _id: room._id,
+              name: room.title,
+              price: room.rent,
+              image: room.images?.[0]
+            });
+          }}
+        >
+          Add
+        </button>
+      </div>
     </div>
   </div>
 );
 
-export default Product;
+export default Header;

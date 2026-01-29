@@ -5,18 +5,19 @@ export const AdminContext = createContext();
 
 export const AdminProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
+  // const backendUrl = "https://raja-electronic.onrender.com";
+  const backendUrl = "http://localhost:5000";
 
   const loginAdmin = async (email, password) => {
     try {
-      // const res = await axios.post("http://localhost:5000/api/admin/login", {
-      const res = await axios.post("https://raja-electronic.onrender.com/api/admin/login", {
+      const res = await axios.post(`${backendUrl}/api/admin/login`, {
         email,
         password,
       });
 
       if (res.data.success) {
         setToken(res.data.token);
-        localStorage.setItem("adminToken", res.data.token); // ✅ Token save
+        localStorage.setItem("adminToken", res.data.token);
         return true;
       } else {
         return false;
@@ -33,7 +34,7 @@ export const AdminProvider = ({ children }) => {
   };
 
   return (
-    <AdminContext.Provider value={{ token, loginAdmin, logoutAdmin }}>
+    <AdminContext.Provider value={{ token, loginAdmin, logoutAdmin, backendUrl }}>
       {children}
     </AdminContext.Provider>
   );

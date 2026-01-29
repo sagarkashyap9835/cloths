@@ -53,15 +53,15 @@ const Navbar = () => {
   return (
     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${isScrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm py-2' : 'bg-white py-4'}`}>
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-5 md:px-10 gap-4">
-        
-        {/* Logo - Sleek Fashion Font */}
+
+
         <Link to="/" className="flex-shrink-0 group">
           <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-black">
-            SHOP<span className="text-gray-400 group-hover:text-red-600 transition-colors uppercase italic">.CO</span>
+            Rental<span className="text-gray-400 group-hover:text-red-600 transition-colors uppercase italic">.platform</span>
           </h1>
         </Link>
 
-        {/* 🔍 Desktop Luxury Search */}
+
         <div className="hidden md:flex items-center bg-gray-50 px-5 py-2.5 rounded-full border border-gray-100 flex-grow max-w-lg mx-8 focus-within:border-black transition-all">
           <input
             type="text"
@@ -70,7 +70,7 @@ const Navbar = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              if (location.pathname !== '/product') navigate('/product');
+              if (location.pathname !== '/findhome') navigate('/findhome');
             }}
           />
           <button onClick={startListening} className="text-gray-400 hover:text-black transition ml-3 text-lg">
@@ -81,9 +81,9 @@ const Navbar = () => {
         {/* Navigation Links & User Actions */}
         <div className="flex items-center gap-6">
           <div className="hidden lg:flex gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">
-            {['Home', 'Product', 'About', 'Contact'].map((item) => (
-              <Link 
-                key={item} 
+            {['Home', 'Findhome', 'About', 'Contact'].map((item) => (
+              <Link
+                key={item}
                 to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
                 className={`relative hover:text-black transition-all group ${location.pathname === (item === 'Home' ? '/' : `/${item.toLowerCase()}`) ? 'text-black' : ''}`}
               >
@@ -95,28 +95,35 @@ const Navbar = () => {
 
           {/* Icons/Profile */}
           <div className="flex items-center gap-4">
-             {token && userData ? (
-                <div className="relative group">
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <img className="w-8 h-8 rounded-full border-2 border-black p-0.5 object-cover" src={userData.image} alt="User" />
-                  </div>
-                  <div className="absolute top-10 right-0 hidden group-hover:block bg-white border border-gray-100 rounded-xl shadow-2xl z-20 w-48 overflow-hidden animate-fade-in">
-                    <p onClick={() => navigate("/my-profile")} className="px-5 py-3 hover:bg-black hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest">My Profile</p>
-                    <p onClick={() => navigate("/my-order")} className="px-5 py-3 hover:bg-black hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest border-t">My Orders</p>
-                    <p onClick={logout} className="px-5 py-3 hover:bg-red-600 hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest border-t">Sign Out</p>
-                  </div>
-                </div>
-              ) : (
-                <button className="bg-black text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition shadow-lg active:scale-95" onClick={() => navigate('/login')}>
-                  Login
-                </button>
-              )}
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative group">
+              <span className="text-2xl">🛒</span>
+              {/* Optional Badge */}
+              {/* <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">1</span> */}
+            </Link>
 
-              {/* Mobile Menu Icon */}
-              <button onClick={() => setShowMenu(true)} className="lg:hidden p-2 bg-gray-50 rounded-full active:scale-90 transition">
-                <div className="w-6 h-0.5 bg-black mb-1.5"></div>
-                <div className="w-4 h-0.5 bg-black"></div>
+            {token && userData ? (
+              <div className="relative group">
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <img className="w-8 h-8 rounded-full border-2 border-black p-0.5 object-cover" src={userData.image} alt="User" />
+                </div>
+                <div className="absolute top-10 right-0 hidden group-hover:block bg-white border border-gray-100 rounded-xl shadow-2xl z-20 w-48 overflow-hidden animate-fade-in">
+                  <p onClick={() => navigate("/my-profile")} className="px-5 py-3 hover:bg-black hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest">My Profile</p>
+                  <p onClick={() => navigate("/my-order")} className="px-5 py-3 hover:bg-black hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest border-t">My Orders</p>
+                  <p onClick={logout} className="px-5 py-3 hover:bg-red-600 hover:text-white transition cursor-pointer text-[10px] font-black uppercase tracking-widest border-t">Sign Out</p>
+                </div>
+              </div>
+            ) : (
+              <button className="bg-black text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition shadow-lg active:scale-95" onClick={() => navigate('/login')}>
+                Login
               </button>
+            )}
+
+            {/* Mobile Menu Icon */}
+            <button onClick={() => setShowMenu(true)} className="lg:hidden p-2 bg-gray-50 rounded-full active:scale-90 transition">
+              <div className="w-6 h-0.5 bg-black mb-1.5"></div>
+              <div className="w-4 h-0.5 bg-black"></div>
+            </button>
           </div>
         </div>
       </nav>
@@ -131,10 +138,10 @@ const Navbar = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              if (location.pathname !== '/product') navigate('/product');
+              if (location.pathname !== '/findhome') navigate('/findhome');
             }}
           />
-          <button onClick={startListening} className="text-gray-400">🎤</button>
+          <button onClick={startListening} className="text-gray-400"></button>
         </div>
       </div>
 
@@ -146,9 +153,9 @@ const Navbar = () => {
         </div>
         <div className="flex flex-col gap-8 mt-10 px-10">
           {['Home', 'Product', 'About', 'Contact'].map((item, idx) => (
-            <p 
-              key={item} 
-              onClick={() => handleLinkClick(item === 'Home' ? '/' : `/${item.toLowerCase()}`)} 
+            <p
+              key={item}
+              onClick={() => handleLinkClick(item === 'Home' ? '/' : `/${item.toLowerCase()}`)}
               className="text-4xl font-black uppercase tracking-tighter hover:text-red-600 transition-all cursor-pointer"
               style={{ transitionDelay: `${idx * 100}ms` }}
             >
@@ -157,9 +164,9 @@ const Navbar = () => {
           ))}
         </div>
         <div className="mt-auto p-10 flex gap-6 text-[10px] font-black uppercase tracking-widest text-gray-400">
-            <span>Instagram</span>
-            <span>Facebook</span>
-            <span>Pinterest</span>
+          <span>Instagram</span>
+          <span>Facebook</span>
+          <span>Pinterest</span>
         </div>
       </div>
     </header>
