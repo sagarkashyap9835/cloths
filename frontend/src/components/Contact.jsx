@@ -113,7 +113,6 @@ const Contact = () => {
                 required
                 className="w-full p-4 rounded-xl bg-gray-100 font-medium"
               />
-
               <input
                 type="email"
                 name="email"

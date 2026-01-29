@@ -26,13 +26,13 @@ export const googleLogin = async (req, res) => {
         let user = await userModel.findOne({ email });
 
         if (!user) {
-            
+
             const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-8), 10);
-            
+
             user = new userModel({
                 name,
                 email,
-                image: picture, 
+                image: picture,
                 password: randomPassword
             });
             await user.save();
@@ -93,6 +93,12 @@ export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Check if it matches Super Admin from .env
+        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+            const token = jwt.sign({ id: 'super-admin', email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+            return res.status(200).json({ success: true, token, message: "Super Admin Login successful" });
+        }
+
         const user = await userModel.findOne({ email });
         if (!user) {
             return res.status(401).json({ success: false, message: "User does not exist" });
@@ -113,7 +119,7 @@ export const loginUser = async (req, res) => {
 // GET USER PROFILE
 export const getProfile = async (req, res) => {
     try {
-        const userId = req.userId; 
+        const userId = req.userId;
 
         const userData = await userModel.findById(userId).select("-password");
         if (!userData) {
@@ -122,7 +128,7 @@ export const getProfile = async (req, res) => {
 
         let parsedAddress = userData.address;
         if (typeof parsedAddress === "string") {
-            try { parsedAddress = JSON.parse(userData.address); } 
+            try { parsedAddress = JSON.parse(userData.address); }
             catch (e) { parsedAddress = { line1: "", line2: "" }; }
         }
 
@@ -163,4 +169,23 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// BECOME OWNER
+export const becomeOwner = async (req, res) => {
+    try {
+        const userId = req.body.userId || req.userId; // Allow from body or auth middleware
+        if (!userId) return res.status(400).json({ success: false, message: "User ID required" });
+
+        if (userId === 'super-admin') {
+            return res.json({ success: true, message: "Super Admin access granted." });
+        }
+
+        const user = await userModel.findByIdAndUpdate(userId, { role: "owner" }, { new: true });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        res.json({ success: true, message: "You are now an Owner! You can list properties.", user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
 

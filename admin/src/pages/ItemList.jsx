@@ -12,11 +12,14 @@ const RoomList = () => {
   const fetchRooms = async () => {
     try {
       const res = await axios.get(
-        `${backendUrl}/api/room/all`
+        `${backendUrl}/api/room/owner-rooms`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
       if (res.data.success) setRooms(res.data.rooms);
     } catch (err) {
-      console.error("Failed to fetch rooms", err);
+      console.error("Failed to fetch owner rooms", err);
     }
   };
 
@@ -61,7 +64,7 @@ const RoomList = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-        Verify Properties (Admin)
+        My Properties
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -107,14 +110,6 @@ const RoomList = () => {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  {!room.verified && (
-                    <button
-                      onClick={() => handleVerify(room._id)}
-                      className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition-colors text-xs"
-                    >
-                      Verify Check ✅
-                    </button>
-                  )}
                   <button
                     onClick={() => handleDelete(room._id)}
                     className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors text-xs"

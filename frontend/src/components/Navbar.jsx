@@ -91,6 +91,9 @@ const Navbar = () => {
                 <span className={`absolute -bottom-1 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full ${location.pathname === (item === 'Home' ? '/' : `/${item.toLowerCase()}`) ? 'w-full' : ''}`}></span>
               </Link>
             ))}
+            <a href="http://localhost:5174" target="_blank" rel="noreferrer" className="bg-red-600 text-white px-4 py-1.5 rounded-full hover:bg-black transition-all animate-pulse shadow-md">
+              LIST YOUR FLAT
+            </a>
           </div>
 
           {/* Icons/Profile */}

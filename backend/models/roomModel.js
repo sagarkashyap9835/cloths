@@ -55,6 +55,7 @@ const roomSchema = new mongoose.Schema(
     aadhaarNumber: { type: String, required: true }, // 12 digit validation in controller
     aadhaarImage: { type: String, required: true },
     verified: { type: Boolean, default: false },
+    ownerId: { type: String, required: true },
   },
   { timestamps: true }
 );

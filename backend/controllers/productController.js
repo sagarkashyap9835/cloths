@@ -146,6 +146,7 @@ export const addRoom = async (req, res) => {
       aadhaarNumber,       // 🆕
       aadhaarImage: aadhaarImageUrl, // 🆕
       verified: false,     // 🆕 Default false
+      ownerId: req.user.id || req.user.email, // Use id or email as fallback
     });
 
     res.json({ success: true, message: "Property submitted for verification", room });
@@ -161,6 +162,17 @@ export const verifyRoom = async (req, res) => {
     const { id } = req.params;
     const room = await Room.findByIdAndUpdate(id, { verified: true }, { new: true });
     res.json({ success: true, message: "Property Verified Successfully", room });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 📄 Get Owner's Rooms
+export const getOwnerRooms = async (req, res) => {
+  try {
+    const ownerId = req.user.id || req.user.email;
+    const rooms = await Room.find({ ownerId });
+    res.json({ success: true, rooms });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
