@@ -7,7 +7,7 @@ export const AppContext = createContext();
 const AppcontextProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Search State (Jo Navbar aur Product page share karenge)
+  
   const [searchTerm, setSearchTerm] = useState("");
 
   // Token state
